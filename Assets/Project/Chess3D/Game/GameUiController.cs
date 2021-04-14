@@ -90,7 +90,15 @@ namespace Assets.Project.Chess3D
                 Global.m_user.score++;
                 socket.Emit("increaseScore", JsonUtility.ToJson(Global.m_user));
                 if (PlayerPrefs.GetInt("VsCPU", 1) != 1)
-                    socket.Emit("set winner", JsonUtility.ToJson(Global.m_user));
+                {
+                    User winUser = new User();
+                    winUser.name = Global.m_user.name;
+                    winUser.address = PlayerPrefs.GetString("RoomID");
+
+                    socket.Emit("set winner", JsonUtility.ToJson(winUser));
+                    // socket.Emit("set winner", JsonUtility.ToJson(Global.m_user));
+                }
+
             }
             //InputInfoText.text = winner;
             //ErrorText.text = string.Empty;

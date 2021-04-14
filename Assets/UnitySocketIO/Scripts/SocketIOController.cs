@@ -4,28 +4,33 @@ using System.Collections;
 using UnitySocketIO.SocketIO;
 using UnitySocketIO.Events;
 
-namespace UnitySocketIO {
-    public class SocketIOController : MonoBehaviour {
-        
+namespace UnitySocketIO
+{
+    public class SocketIOController : MonoBehaviour
+    {
+
         public SocketIOSettings settings;
         public string domain = "localhost";
-        public  BaseSocketIO socketIO;
+        public BaseSocketIO socketIO;
         public static SocketIOController instance;
         // public bool isTesting = false;
         public string SocketID { get { return socketIO.SocketID; } }
 
-        void Awake() {
+        void Awake()
+        {
 
             if (instance != null)
                 Destroy(instance.gameObject);
             instance = this;
-            
+
             DontDestroyOnLoad(gameObject);
 
-            if(Application.platform == RuntimePlatform.WebGLPlayer) {
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+            {
                 socketIO = gameObject.AddComponent<WebGLSocketIO>();
             }
-            else {
+            else
+            {
                 socketIO = gameObject.AddComponent<NativeSocketIO>();
             }
 
@@ -35,12 +40,12 @@ namespace UnitySocketIO {
             //}
             //else
             //{
-                settings.sslEnabled = Global.SSL_ENALBLED;
-                settings.url = Global.DOMAIN;// Global.DOMAIN;
-                settings.port = Global.PORT;
+            settings.sslEnabled = Global.SSL_ENALBLED;
+            settings.url = Global.DOMAIN;// Global.DOMAIN;
+            settings.port = Global.PORT;
             //}
 
-            
+
 
             if (Global.isTesting)
             {
@@ -49,7 +54,7 @@ namespace UnitySocketIO {
                 settings.port = Global.testingPort;
                 Debug.Log("Testing...");
             }
-            
+
             Debug.Log("Port : " + settings.port);
             Debug.Log("URL : " + settings.url);
 
@@ -58,19 +63,20 @@ namespace UnitySocketIO {
 
         private void Start()
         {
-            
+
             Global.socketConnected = false;
 
             On("connected", Connected);
-            
+
+            Connect();
 
             StartCoroutine(iReconnect());
         }
 
         IEnumerator iReconnect()
         {
-            yield return new WaitForSeconds(0.5f);
-            
+            yield return new WaitForSeconds(2f);
+
             if (Global.socketConnected)
             {
                 yield break;
@@ -78,7 +84,7 @@ namespace UnitySocketIO {
             }
             Debug.Log("*******Socket Connecting...");
             Connect();
-            // StartCoroutine(iReconnect());
+            StartCoroutine(iReconnect());
         }
         private void Connected(SocketIOEvent obj)
         {
@@ -86,31 +92,39 @@ namespace UnitySocketIO {
             Global.socketConnected = true;
         }
 
-        public void Connect() {
+        public void Connect()
+        {
             socketIO.Connect();
         }
 
-        public void Close() {
+        public void Close()
+        {
             socketIO.Close();
         }
 
-        public void Emit(string e) {
+        public void Emit(string e)
+        {
             socketIO.Emit(e);
         }
-        public void Emit(string e, Action<string> action) {
+        public void Emit(string e, Action<string> action)
+        {
             socketIO.Emit(e, action);
         }
-        public void Emit(string e, string data) {
+        public void Emit(string e, string data)
+        {
             socketIO.Emit(e, data);
         }
-        public void Emit(string e, string data, Action<string> action) {
+        public void Emit(string e, string data, Action<string> action)
+        {
             socketIO.Emit(e, data, action);
         }
 
-        public void On(string e, Action<SocketIOEvent> callback) {
+        public void On(string e, Action<SocketIOEvent> callback)
+        {
             socketIO.On(e, callback);
         }
-        public void Off(string e, Action<SocketIOEvent> callback) {
+        public void Off(string e, Action<SocketIOEvent> callback)
+        {
             socketIO.Off(e, callback);
         }
 

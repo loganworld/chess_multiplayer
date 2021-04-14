@@ -25,6 +25,8 @@ public class Global
     public static string myname = "";
     public static string othername = "";
 
+    public static int limitedMinutes = 10;
+
     public static void GetDomain()
     {
         currentDomain = DOMAIN;

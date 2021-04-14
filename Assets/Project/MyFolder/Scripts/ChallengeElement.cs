@@ -63,6 +63,8 @@ public class ChallengeElement : MonoBehaviour
         if (btnName.text == "CHALLENGE")
         {
             bet_mount.text = PlayerPrefs.GetString("challenge_amount");
+            if (float.Parse(bet_mount.text) >= Global.balance)
+                bet_mount.text = Global.balance.ToString();
         }
     }
 
@@ -99,7 +101,6 @@ public class ChallengeElement : MonoBehaviour
         userList.users.Add(Global.m_user);
 
         userList.users.Add(new User(-1, room_amount));
-
         if (room_amount == "" || room_amount == null || float.Parse(room_amount) > Global.balance)
             return;
 

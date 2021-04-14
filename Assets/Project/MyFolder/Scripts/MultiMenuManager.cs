@@ -50,16 +50,15 @@ public class MultiMenuManager : MonoBehaviour
 
         socket = SocketIOController.instance;
 
-        // socket.Connect();
+        //socket.Connect();
 
         socket.On("show room", GetRooms);
         socket.On("createdRoom", OnCreatedRoom);
         socket.On("show users", GetUsers);
         socket.On("show challenges", GetChallenges);
         socket.On("sent balance", setbalance);
+
         socket.On("show transaction", ShowTransaction);
-
-
 
 
         // Global.m_user = new User(101,"qqq",103);
@@ -365,7 +364,7 @@ public class MultiMenuManager : MonoBehaviour
             temp = Instantiate(userPrefab) as GameObject;
             temp.transform.name = index.ToString();
             Debug.Log("user " + user.ToString());
-            temp.GetComponent<ChallengeElement>().SetProps(index.ToString(), user.id, user.name, user.score.ToString(), "0");
+            temp.GetComponent<ChallengeElement>().SetProps(index.ToString(), user.id, user.name, user.score.ToString(), "1");
             temp.transform.SetParent(userContent.transform);
             temp.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         }
@@ -381,7 +380,6 @@ public class MultiMenuManager : MonoBehaviour
     }
     public void OnClickCreateButton()
     {
-        Debug.Log("sss" + c_Bet_amount.text);
         if (c_RoomName.text == "")
             return;
         if (c_Bet_amount.text == "")
@@ -395,17 +393,14 @@ public class MultiMenuManager : MonoBehaviour
 
         if (Global.socketConnected)
         {
-            socket.Emit("createRoom", JsonUtility.ToJson(new Room(c_RoomName.text, "123", c_Bet_amount.text.ToString())));
+            socket.Emit("createRoom", JsonUtility.ToJson(new Room(c_RoomName.text, "123", c_Bet_amount.text)));
         }
 
     }
 
     public void OnClickChallengeButton()
     {
-        if (Global.socketConnected)
-        {
-            socket.Emit("get challenges", JsonUtility.ToJson(Global.m_user));
-        }
+        socket.Emit("get challenges", JsonUtility.ToJson(Global.m_user));
         //socket.Emit("get user list", JsonUtility.ToJson(Global.m_user));
     }
 }
@@ -491,6 +486,7 @@ public class ChallengeList
         return JsonUtility.FromJson<ChallengeList>(data);
     }
 }
+
 
 [Serializable]
 public class Transaction

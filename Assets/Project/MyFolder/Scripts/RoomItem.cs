@@ -40,8 +40,6 @@ public class RoomItem : MonoBehaviour
     public void OnclickButtonJoin()
     {
 
-        if (Global.balance < float.Parse(amount))
-            return;
         Debug.Log("name == " + name);
         Debug.Log("id  == " + id);
 

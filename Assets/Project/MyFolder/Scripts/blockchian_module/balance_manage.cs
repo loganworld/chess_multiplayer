@@ -28,23 +28,15 @@ public class balance_manage : MonoBehaviour
 
     public void get_info()
     {
-
-        StartCoroutine(balance_update());
+        balance_update();
         deposit();
     }
-
-    IEnumerator balance_update()
+    void balance_update()
     {
-        yield return new WaitForSeconds(0.2f);
-
         if (Global.socketConnected)
         {
-            socket.Emit("get balance", JsonUtility.ToJson(Global.m_user));
+            SocketIOController.instance.Emit("get balance", JsonUtility.ToJson(Global.m_user));
             SocketIOController.instance.Emit("get transactions", JsonUtility.ToJson(Global.m_user));
-        }
-        else
-        {
-            StartCoroutine(balance_update());
         }
     }
 

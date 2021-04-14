@@ -63,11 +63,14 @@ public class EventManager : MonoBehaviour
             room_amount = PlayerPrefs.GetString("RoomAmount");
 
             socket = SocketIOController.instance;
+
             socket.On("gameTurn", OnGetGameTurn);
             socket.On("other player turned", OnOtherPlayerTurned);
             socket.On("gave up", GaveUp);
+            socket.On("other disconnected", Disconnected);
 
             socket.Emit("joinRoom", JsonUtility.ToJson(new Room(roomName, roomID, "0")));
+            
 
             waitingWindow.SetActive(true);
             leftWindow.SetActive(false);
@@ -304,6 +307,11 @@ public class EventManager : MonoBehaviour
 
     }
 
+    void Disconnected(SocketIOEvent socketIOEvent)
+    {
+        gc.UiController.EndGame("YOU" + " WINS.");
+        BlockEvents();
+    }
 
     public void CancelWaiting()
     {

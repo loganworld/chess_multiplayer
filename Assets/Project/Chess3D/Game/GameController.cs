@@ -10,7 +10,8 @@ using System.Threading.Tasks;
 using System.Collections;
 using UnityEngine.Networking;
 using UnityEngine.UI;
-
+using UnitySocketIO;
+using UnitySocketIO.Events;
 
 namespace Assets.Project.Chess3D
 {
@@ -36,7 +37,7 @@ namespace Assets.Project.Chess3D
         private float f_white_time;
         private float f_black_time;
 
-      
+
 
         void Start()
         {
@@ -76,8 +77,16 @@ namespace Assets.Project.Chess3D
             black_turn_frame.GetComponent<Image>().enabled = false;
 
             //StartGame();
-            f_black_time = 0f;
-            f_white_time = 0f;
+            if (PlayerPrefs.GetInt("VsCPU", 1) == 1)
+            {
+                f_black_time = 0f;
+                f_white_time = 0f;
+            }
+            else
+            {
+                f_black_time = Global.limitedMinutes * 60f;
+                f_white_time = Global.limitedMinutes * 60f;
+            }
         }
 
         private void SetupPieces()
@@ -113,17 +122,56 @@ namespace Assets.Project.Chess3D
                 // white_time.text = GetTime((int)f_white_time);
             }
 
-            if(Board.OnTurn == ChessEngine.Color.White)
+            if (Board.OnTurn == ChessEngine.Color.White)
             {
-                f_white_time += Time.deltaTime;
-                  white_time.text = GetTime((int)f_white_time);
+                if (PlayerPrefs.GetInt("VsCPU", 1) == 1)
+                {
+                    f_white_time += Time.deltaTime;
+                }
+                else
+                {
+                    if (f_white_time < 0.0001)
+                    {
+                        return;
+                    }
+                    f_white_time -= Time.deltaTime;
+                    if (f_white_time <= 0f)
+                    {
+                        f_white_time = 0f;
+                        if (Global.myTurn == 0 && OnTurn.Id == "White player" || Global.myTurn == 1 && OnTurn.Id == "Black player")
+                        {
+                            SocketIOController.instance.Emit("give up", JsonUtility.ToJson(new Room(Global.myTurn.ToString(), PlayerPrefs.GetString("RoomID"), "0")));
+                        }
+                    }
+                }
+                white_time.text = GetTime((int)f_white_time);
                 white_turn_frame.GetComponent<Image>().enabled = true;
                 black_turn_frame.GetComponent<Image>().enabled = false;
             }
             else
             {
-                 f_black_time += Time.deltaTime;
-                   black_time.text = GetTime((int)f_black_time);
+                if (PlayerPrefs.GetInt("VsCPU", 1) == 1)
+                {
+                    f_black_time += Time.deltaTime;
+                }
+                else
+                {
+                    if (f_black_time < 0.0001)
+                    {
+                        return;
+                    }
+                    f_black_time -= Time.deltaTime;
+                    if (f_black_time <= 0f)
+                    {
+                        f_black_time = 0f;
+                        if (Global.myTurn == 0 && OnTurn.Id == "White player" || Global.myTurn == 1 && OnTurn.Id == "Black player")
+                        {
+                            SocketIOController.instance.Emit("give up", JsonUtility.ToJson(new Room(Global.myTurn.ToString(), PlayerPrefs.GetString("RoomID"), "0")));
+                        }
+                    }
+                }
+
+                black_time.text = GetTime((int)f_black_time);
                 white_turn_frame.GetComponent<Image>().enabled = false;
                 black_turn_frame.GetComponent<Image>().enabled = true;
             }
@@ -149,7 +197,7 @@ namespace Assets.Project.Chess3D
                 if (OnTurn is Bot)
                 {
                     yield return new WaitForSeconds(0.1f);
-                    
+
                     Move move = OnTurn.CalculateNext();
 
                     Bot bot = OnTurn as Bot;
@@ -161,23 +209,23 @@ namespace Assets.Project.Chess3D
                 }
                 else
                 {
-                    
-                    string turner_name="AI";
 
-                    if(Global.myTurn==0&&OnTurn.Id=="White player"||Global.myTurn==1&&OnTurn.Id=="Black player")
-                        turner_name="My";
-                    else 
-                        turner_name=Global.othername;
-                        
+                    string turner_name = "AI";
+
+                    if (Global.myTurn == 0 && OnTurn.Id == "White player" || Global.myTurn == 1 && OnTurn.Id == "Black player")
+                        turner_name = "My";
+                    else
+                        turner_name = Global.othername;
+
                     if (SelectedPiece == null)
                     {
-                        UiController.ShowInputInfoText(turner_name+ " turn, select piece to move.");
+                        UiController.ShowInputInfoText(turner_name + " turn, select piece to move.");
                     }
                     else
                     {
                         UiController.ShowInputInfoText(turner_name + " turn, select square to move.");
                     }
-                    
+
                 }
                 yield return new WaitForSeconds(0.3f);
                 /// Debug.Log("pending...");
@@ -193,8 +241,8 @@ namespace Assets.Project.Chess3D
             WWWForm formData = new WWWForm();
             formData.AddField("fen", fen);
             formData.AddField("userId", Global.m_user.id.ToString());
-            
-            
+
+
             string requestURL = Global.currentDomain + "/api/savegame";
 
             UnityWebRequest www = UnityWebRequest.Post(requestURL, formData);
@@ -231,12 +279,12 @@ namespace Assets.Project.Chess3D
         {
             string strCurTurn;
 
-            
+
             while (true)
             {
                 strCurTurn = Board.OnTurn.ToString();
-                
-                
+
+
                 OnTurn = Players[(strCurTurn[0] == 'W' ? 0 : 1)];
 
                 //OnTurn = Players[(int)Board.OnTurn];
@@ -275,11 +323,11 @@ namespace Assets.Project.Chess3D
         private void EndGame()
         {
             IPlayer winner = Players[(int)Board.OnTurn ^ 1];
-            string winner_string="";
-            
-            if(Global.myTurn==0&&winner.Id=="White player"||Global.myTurn==1&&winner.Id=="Black player")
-                winner_string="You";
-            else winner_string=Global.othername;
+            string winner_string = "";
+
+            if (Global.myTurn == 0 && winner.Id == "White player" || Global.myTurn == 1 && winner.Id == "Black player")
+                winner_string = "You";
+            else winner_string = Global.othername;
 
             UiController.EndGame(winner_string + " WINS.");
             EventManager.BlockEvents();

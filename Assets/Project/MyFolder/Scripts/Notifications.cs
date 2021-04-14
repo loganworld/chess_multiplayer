@@ -35,9 +35,8 @@ public class Notifications : MonoBehaviour
             socket.Emit("get challenges", JsonUtility.ToJson(Global.m_user));
         }
         else
-        {
             StartCoroutine(GetChallenge());
-        }
+
     }
     private void GotChallengeNotifications(SocketIOEvent socketIOEvent)
     {
