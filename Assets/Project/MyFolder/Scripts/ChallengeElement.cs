@@ -63,8 +63,12 @@ public class ChallengeElement : MonoBehaviour
         if (btnName.text == "CHALLENGE")
         {
             bet_mount.text = PlayerPrefs.GetString("challenge_amount");
+            if(bet_mount.text=="")
+                bet_mount.text="0";
             if (float.Parse(bet_mount.text) >= Global.balance)
                 bet_mount.text = Global.balance.ToString();
+            if(float.Parse(bet_mount.text)<10)
+                bet_mount.text="0";
         }
     }
 

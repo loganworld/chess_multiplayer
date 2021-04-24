@@ -92,12 +92,24 @@ namespace Assets.Project.Chess3D
                 if (PlayerPrefs.GetInt("VsCPU", 1) != 1)
                 {
                     User winUser = new User();
+                    winUser.id=Global.m_user.id;
                     winUser.name = Global.m_user.name;
                     winUser.address = PlayerPrefs.GetString("RoomID");
-
-                    socket.Emit("set winner", JsonUtility.ToJson(winUser));
+                    string amount=PlayerPrefs.GetString("RoomAmount");
+                    if(amount!="")
+                        if(float.Parse(amount)>0){
+                            Global.m_user.score+=9;
+                            socket.Emit("set winner", JsonUtility.ToJson(winUser));
+                        }
                     // socket.Emit("set winner", JsonUtility.ToJson(Global.m_user));
                 }
+                else{
+                    float amount=PlayerPrefs.GetFloat("Ai_Bet_Amount");
+                    if(amount>0){
+                        Global.m_user.score+=9;
+                        socket.Emit("set winner vs ai", JsonUtility.ToJson(new Ai_Bet(Global.m_user.id,amount)));
+                    }
+                } 
 
             }
             //InputInfoText.text = winner;

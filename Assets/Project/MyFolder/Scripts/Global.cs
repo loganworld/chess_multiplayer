@@ -6,7 +6,7 @@ using UnityEngine;
 public class Global
 {
     public static string DOMAIN = "45.82.72.245";
-    public static int PORT = 0;//3001;
+    public static int PORT = 3001;
     public static bool SSL_ENALBLED = false;
 
     public static bool isTesting = false;

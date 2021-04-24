@@ -48,6 +48,7 @@ public class MenuUiController : MonoBehaviour
     public GameObject btn_singleplayer;
     public GameObject btn_multiplayer;
     public GameObject btn_loadgame;
+    SocketIOController socket;
 
     public GameObject btn_easy;
     public GameObject btn_medium;
@@ -58,6 +59,10 @@ public class MenuUiController : MonoBehaviour
     bool isLoading = false;
     AsyncOperation op;
     public GameObject btn_single_start;
+    
+    public InputField Ai_Bet_Amount;
+
+
 
     private static MenuUiController instance;
     public static MenuUiController Instance
@@ -70,6 +75,8 @@ public class MenuUiController : MonoBehaviour
 
     private void Awake()
     {
+
+        socket = SocketIOController.instance;
         if (instance == null)
         {
             instance = this;
@@ -80,7 +87,6 @@ public class MenuUiController : MonoBehaviour
     {
         /*******************************/
         Global.savedData = "";
-
 
         ErrorText.text = string.Empty;
 
@@ -252,6 +258,26 @@ public class MenuUiController : MonoBehaviour
     {
         PlayerPrefs.SetInt("VsCPU", 1);
 
+        
+        float amount;
+        if(Ai_Bet_Amount.text!="")
+            amount=float.Parse(Ai_Bet_Amount.text);
+        else amount=0;
+
+        if(amount>Global.balance){
+            amount=Global.balance;
+            Ai_Bet_Amount.text=amount.ToString();
+        }
+        
+        if(amount<10)
+            amount=0;
+            
+        if(amount>0)
+            difficulty="4";
+        PlayerPrefs.SetFloat("Ai_Bet_Amount", amount);
+
+        socket.Emit("start bet ai",JsonUtility.ToJson(new Ai_Bet(Global.m_user.id,amount)));
+
         SceneLoading.Context.Clear();
 
         SceneLoading.Context.Inject(SceneLoading.Parameters.WhiteChoice, WhiteChoice.options[0].text);
@@ -372,4 +398,18 @@ public class SavedList
     {
         return JsonUtility.FromJson<SavedList>(data);
     }
+}
+
+[Serializable]
+public class Ai_Bet
+{
+    public long id;
+    public float amount;
+
+    public Ai_Bet(long id, float amount)
+    {
+        this.id = id;
+        this.amount = amount;
+    }
+
 }

@@ -82,6 +82,8 @@ public class EventManager : MonoBehaviour
         {
             Global.myname = "me";
             Global.othername = "AI";
+            
+            animCamera.GetComponent<CameraMovement>().enabled = true;
         }
 
 
